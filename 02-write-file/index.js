@@ -19,3 +19,5 @@ process.on("exit", (code) => {
     stdout.write("Good-bye!\n");
   }
 });
+
+process.on('SIGINT',()=> process.exit());
