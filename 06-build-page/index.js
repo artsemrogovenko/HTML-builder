@@ -8,7 +8,7 @@ const assetsFolder = path.join(__dirname,"assets");
 const buildedHtml = path.join(destFolder,"index.html");
 
 const event = new EventEmitter();
-event.on('ready',copyHtml);
+event.on('ready',startBuild);
 
 (()=>{
   fs.rm(destFolder, { recursive: true }, (error) => {
@@ -31,6 +31,30 @@ function readFile(path){
 }
 
 function mergeStyles(){
+  fs.readdir(cssFolder,
+    { withFileTypes: true },  (err, files) => {
+   
+    if (err) {
+      console.log(err);
+    } else {
+      const writeStream =  fs.createWriteStream(path.join(destFolder,"style.css"),{flags:"a"});
+  
+      let cssFiles = files.filter((file) => {
+        if(file.isFile()){
+          let currentPath=path.join(file.parentPath,file.name);
+            let extension=path.extname(currentPath);
+            return extension===".css";
+        }
+      });
+      cssFiles.forEach((css,index)=>{
+        let cssfile= path.join(css.parentPath,css.name);
+        const stream = fs.createReadStream(cssfile);
+        stream.on("data", (data) => {
+          index < cssFiles.length-1? writeStream.write(data+ os.EOL) : writeStream.write(data);
+        });
+      });
+    }
+  });
 }
 
 function replaceSection(htmlPath){
@@ -40,5 +64,6 @@ function cloneFolders(){
 }
 
 function startBuild(){
-
+  copyHtml();
+  mergeStyles();
 }
