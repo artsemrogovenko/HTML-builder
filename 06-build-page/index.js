@@ -27,7 +27,12 @@ function copyHtml(){
   });
 }
 
-function readFile(path){
+async function readFile(path,call){
+  let text= "";
+  const stream = fs.createReadStream(path,"utf8");
+    stream.on("data", (data) =>{text+=data});
+    stream.on("end", () =>{ call(null,text)});
+    stream.on("error", (err)=>{call(err,null)});
 }
 
 function mergeStyles(){
@@ -58,6 +63,16 @@ function mergeStyles(){
 }
 
 function replaceSection(htmlPath){
+  let textPage="";
+  readFile(htmlPath,(err,data)=>{
+    if(err){
+      console.log(err);
+      textPage= null;
+    }else{
+      textPage= data;
+      console.log(textPage);
+    }
+  });
 }
 
 function cloneFolders(src){
@@ -91,4 +106,5 @@ function startBuild(){
   copyHtml();
   mergeStyles();
   cloneFolders(assetsFolder);
+  replaceSection(buildedHtml);
 }
