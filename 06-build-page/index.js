@@ -60,10 +60,35 @@ function mergeStyles(){
 function replaceSection(htmlPath){
 }
 
-function cloneFolders(){
+function cloneFolders(src){
+  fs.readdir(src,
+    { withFileTypes: true },  (err, files) => {
+  
+    if (err) {
+      console.log(err);
+    } else {
+      files.forEach((file) => {
+        let targetPath=path.join(file.parentPath,file.name);
+        let destPath=path.join(destFolder,"assets",file.name);
+
+        if(file.isFile()){
+            destPath=path.join(destFolder,"assets",targetPath.split("assets\\")[1]);
+            fs.copyFile(targetPath,destPath,(err) => {          });
+          }else{
+            fs.mkdir(destPath, {recursive: true }, (err) => {
+                if (err) {
+                  console.log(err.message);
+                }
+                cloneFolders(targetPath);
+              });
+          }
+      });
+    }
+  });
 }
 
 function startBuild(){
   copyHtml();
   mergeStyles();
+  cloneFolders(assetsFolder);
 }
