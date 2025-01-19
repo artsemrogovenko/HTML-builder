@@ -27,7 +27,7 @@ function copyHtml(){
   });
 }
 
-async function readFile(path,call){
+function readFile(path,call){
   let text= "";
   const stream = fs.createReadStream(path,"utf8");
     stream.on("data", (data) =>{text+=data});
@@ -64,15 +64,40 @@ function mergeStyles(){
 
 function replaceSection(htmlPath){
   let textPage="";
-  readFile(htmlPath,(err,data)=>{
-    if(err){
+  readFile(htmlPath, (err, data) => {
+    if (err) {
       console.log(err);
-      textPage= null;
-    }else{
-      textPage= data;
-      console.log(textPage);
+    } else {
+      findSection(data,(err,out)=>{
+        if(err){
+          console.log(err.message);
+        }else{
+            console.log(out);
+        }
+       });
     }
   });
+}
+
+function findSection(text, call){
+ let openBrace= text.indexOf("{");
+ let closeBrace= text.indexOf("}");
+ if(openBrace!== -1 && closeBrace!== -1){
+  closeBrace+=1;
+  const replaceWord = text.slice(openBrace,closeBrace+1);
+  const searchWord = replaceWord.slice(2,replaceWord.length-2);
+
+  readFile( path.join(__dirname, 'components', `${searchWord}.html`),
+    (err, data) => {
+      if (err) {
+        call(err,["","",false]);
+      } else {
+        call(null,[replaceWord, data, true]);
+      }
+    });
+ }else{
+   call(null,["","",false]);
+ }
 }
 
 function cloneFolders(src){
@@ -106,5 +131,5 @@ function startBuild(){
   copyHtml();
   mergeStyles();
   cloneFolders(assetsFolder);
-  replaceSection(buildedHtml);
+  replaceSection(path.join(__dirname,"template.html"));
 }
