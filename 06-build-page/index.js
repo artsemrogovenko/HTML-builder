@@ -143,7 +143,7 @@ function cloneFolders(src) {
           destPath = path.join(
             destFolder,
             'assets',
-            targetPath.split('assets\\')[1],
+            targetPath.split(`assets${path.sep}`)[1],
           );
           fs.copyFile(targetPath, destPath, () => {});
         } else {
