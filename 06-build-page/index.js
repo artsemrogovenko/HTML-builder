@@ -9,6 +9,10 @@ const buildedHtml = path.join(destFolder,"index.html");
 
 const event = new EventEmitter();
 event.on('ready',startBuild);
+event.on("replaced",(text)=>{
+  const writeStream =  fs.createWriteStream(buildedHtml);
+  writeStream.write(text);
+});
 
 (()=>{
   fs.rm(destFolder, { recursive: true }, (error) => {
@@ -85,7 +89,7 @@ function replaceSection(htmlPath){
       textPage = data;
       const replacement = (current) => {
         replaceTag(current, (newData, found) => {
-          found ?  replacement(newData) :  console.log(newData);
+          found ?  replacement(newData) :  event.emit("replaced",newData);
         });
       };
 
