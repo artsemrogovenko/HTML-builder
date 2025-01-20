@@ -64,17 +64,32 @@ function mergeStyles(){
 
 function replaceSection(htmlPath){
   let textPage="";
+  const replaceTag= (text,call)=>{
+    findSection(text,(err,data)=>{
+      if(err){
+        console.log(err.message);
+      }else{
+        if(data[2]){
+          text= text.replace(data[0],data[1]);
+          call(text,data[2]);
+        }
+      }
+      call(text, data[2]);
+     });
+  }
+
   readFile(htmlPath, (err, data) => {
     if (err) {
       console.log(err);
     } else {
-      findSection(data,(err,out)=>{
-        if(err){
-          console.log(err.message);
-        }else{
-            console.log(out);
-        }
-       });
+      textPage = data;
+      const replacement = (current) => {
+        replaceTag(current, (newData, found) => {
+          found ?  replacement(newData) :  console.log(newData);
+        });
+      };
+
+      replacement(textPage);
     }
   });
 }
